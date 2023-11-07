@@ -1,0 +1,66 @@
+ORDER PROCESS...
+1. take order
+2. analyze order elements and find
+	-type of rice
+	-flip?
+	-main ingredients
+	-toppings 
+	-sauce
+	-boba flavor
+	-boba additions
+3. drag and drop correct rice 
+4. drag and drop vinegar sauce at halfway
+5. unroll nori
+6. drag and drop rice when done cooking
+7. switch to build station (check for flip)
+8. drag and drop main ingredients w/ equal spacing
+9. roll button
+10. drag and drop toppings
+11. apply sauce or shakers
+12. slice sushi
+13. press button for boba at perfect time
+14. select flavor, button 
+15. select addition, button
+16. drag cup to plate
+17. drag ticket
+
+GAME PLAN...
+- With nothing to do, be at order station, ready to take orders
+- When rice within 5 sec of finishing, wait for it to complete 
+and take it off before starting another action
+- When rice passes halfway, prioritize it
+
+
+game states...
+-Cooking
+-Filling
+-Topping
+-Chop
+-Drink
+-Serve
+
+
+NUMBERS...
+Rice to cook: 25 seconds
+-bad to leave on after it cooks
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
