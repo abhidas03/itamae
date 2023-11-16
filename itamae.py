@@ -143,7 +143,7 @@ def play():
     time.sleep(2)
 
     game_state = {
-                  'orders': {}, 
+                  'orders': [], 
                   'rice_timer': [], 
                   'running': True,
                   'rice_pots': [0, 0, 0]

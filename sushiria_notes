@@ -44,11 +44,13 @@ NUMBERS...
 Rice to cook: 25 seconds
 -bad to leave on after it cooks
 
+main ingredient 
+2024, 974 -> 2224, 1074
 
-
-
-
-
+GATHERING INGREDIENTS
+-GET IMAGE OF INGREDIENT
+-COMPARE TO OTHER IMAGES, LOOK FOR MATCH 
+-IF MATCH IS X, SET THAT TYPE INGREDIENT TO X
 
 
 
