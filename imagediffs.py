@@ -6,10 +6,9 @@ import os
 
 
 import time
-iFolder = os.listdir('./imgs/ingredients')
+iFolder = os.listdir('./imgs/zeroed/')
 
 for image in iFolder:
-    print(image)
     im1 = Image.open(f'./imgs/ingredients/{image}')
     im2 = Image.open('blank.png')
     im1 = im1.convert('L')

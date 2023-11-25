@@ -1,8 +1,13 @@
 import pyautogui
-import PIL.ImageGrab as yoink
+import PIL
+from PIL import Image, ImageChops, ImageGrab
 import time
 import numpy as np
-import random
+import os
+
+#some global constants to use
+IFOLDER = os.listdir('./imgs/zeroed')
+BLANK_MAIN = Image.open('./imgs/BLANK_MAIN.png')
 
 class Order:
     def __init__(self, ricePosition, ingredients, riceTimer=0, flip=False):
@@ -44,6 +49,20 @@ def ret(point):
     return (point.x//2, point.y//2)
     #return (point.x, point.y)
 
+def ret2(coords):
+    return (coords[0]//2, coords[1]//2, coords[2]//2, coords[3]//2)
+
+def image_err(image1, image2):
+    image1 = image1.convert('L')
+    image2 = image2.convert('L')
+    diff = ImageChops.difference(image1, image2)
+    imageData = list(diff.getdata())
+    imageData = np.array(imageData)
+    h, w = diff.size
+    err = np.sum(imageData ** 2)
+    mse = err/(float(h*w))
+    return mse**0.5
+
 #Taken from slowfrog---
 def wait_for(f, period=0.5, timeout=30):
     start_time = time.time()
@@ -64,22 +83,37 @@ def lambdifyi(f, params):
 def canTakeOrder():
     #switch to order screen
     n = pyautogui.locateCenterOnScreen('./imgs/order.png', grayscale=True, confidence=0.8)
-    if n is None:
-        return False
-    else:
-        return True
+    return n is None
 
-def recordIngredients():
+def isFlip():
+    print('checking if flip')
+    flipx = 1940
+    flipy = 861
+    im = PIL.ImageGrab.grab(bbox=((flipx - 10) // 2, (flipy - 10) // 2, (flipx + 10) // 2, (flipy + 10) // 2)).convert('RGB')
+    flipColor = (205, 156, 224)
+    flipImageData = list(im.getdata())
+    return flipColor in flipImageData
+
+def getTicket():
     #make ingredients list
-    ingredients = set()
-    boxList = [(1012, 487, 1112, 537)]
-    i = 0
-    for bbox in boxList:
-        yoink(bbox).save('ingredient{i}.png')
-        i += 1
-    ingredients.add('rice')
+    print('starting search')
+    ticket = {'fillings': [], 'toppings': [], 'drink': [], 'flip': False}
+    coords = {'main': [(2024, 974, 2224, 1074)]}
+    im = ImageGrab.grab(bbox = ret2(coords['main'][0])) 
+    im.save('TESTING_RECORD.png')
+    im = ImageChops.difference(im, BLANK_MAIN)
+    #need to do this for the three filling spots
+    #plus every other component of order
+    for image in IFOLDER:
+        im2 = Image.open('./imgs/zeroed/' + image)
+        res = image_err(im, im2)
+        if (res < 15):
+            print("MATCH FOUND: " + image[:-4], res) 
+            ingredients['fillings'].append(image[7:-4])
+
+    print(ingredients['filling'])
     flip = False
-    return ingredients, flip
+    return ticket
 
 def takeOrder():
     #TODO: make sure on order screen before doing this
@@ -90,6 +124,7 @@ def takeOrder():
 
     pyautogui.click(ret(n))
     # TODO: get ingredients and put everything into game_state,
+    time.sleep(5)
 
     ingredients = recordIngredients()  
     #rice_position = availableRicePot()
@@ -139,6 +174,19 @@ def startGame():
         time.sleep(0.1)
     pyautogui.click(ret(n))
 
+'''
+Initializes game state
+Performs start sequence if needed
+(starts cooking rice)
+waits for first order
+enters main game loop:
+    - finds next best action
+        :check rice timers for vinegar and make sure don't overcook
+        :need to check for any blockers (if rice can't move on, will overcook orders)
+        :if there is a rice pot open, take order
+        :otherwise, build orders (if no food left, then do drinks)
+    - performs action
+'''
 def play():
     time.sleep(2)
 
@@ -152,11 +200,12 @@ def play():
     lamb = lambdifyi(canTakeOrder, [])
     print('waiting for orders...')
 
-    wait_for(lamb, period=0.5, timeout=30)
+    wait_for(lamb, period=0.2, timeout=30)
     while (game_state['running']):
         action = bestAction(game_state)
         performAction(action, game_state)
         #update game_state time elapsed on each order
+        
         time.sleep(1)
 
 
