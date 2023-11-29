@@ -5,9 +5,12 @@ import time
 import numpy as np
 import os
 
-#some global constants to use
 IFOLDER = os.listdir('./imgs/zeroed')
 BLANK_MAIN = Image.open('./imgs/BLANK_MAIN.png')
+FLIP_COLOR = (205, 156, 224)
+COORDS = {'main_filling': (2024, 974, 2224, 1074), 'bottom_filling': (2024, 1110, 2224, 1210), 'top_filling': (2024, 840, 2224, 940), 
+          'topping': (2024, 672, 2224, 772), 'sauce': (2080, 562, 2517, 620), 'seasoning': (), 'flavor': (1936, 286, 2043, 386), 
+          'boba': (2205, 286, 2312, 386), 'flip': (1930, 851, 1950, 871)}
 
 class Order:
     def __init__(self, ricePosition, ingredients, riceTimer=0, flip=False):
@@ -81,9 +84,9 @@ def lambdifyi(f, params):
 #----------------------
 
 def canTakeOrder():
-    #switch to order screen
+    #TODO: switch to order screen
     n = pyautogui.locateCenterOnScreen('./imgs/order.png', grayscale=True, confidence=0.8)
-    return n is None
+    return n is not None
 
 def isFlip():
     print('checking if flip')
@@ -94,12 +97,9 @@ def isFlip():
     flipImageData = list(im.getdata())
     return flipColor in flipImageData
 
-def getTicket():
-    #make ingredients list
-    print('starting search')
-    ticket = {'fillings': [], 'toppings': [], 'drink': [], 'flip': False}
-    coords = {'main': [(2024, 974, 2224, 1074)]}
-    im = ImageGrab.grab(bbox = ret2(coords['main'][0])) 
+def getFillings():
+    fillings = []
+    im = ImageGrab.grab(bbox = ret2(COORDS['main_filling'])) 
     im.save('TESTING_RECORD.png')
     im = ImageChops.difference(im, BLANK_MAIN)
     #need to do this for the three filling spots
@@ -109,10 +109,17 @@ def getTicket():
         res = image_err(im, im2)
         if (res < 15):
             print("MATCH FOUND: " + image[:-4], res) 
-            ingredients['fillings'].append(image[7:-4])
-
-    print(ingredients['filling'])
-    flip = False
+            fillings.append(image[7:-4])
+    return fillings 
+    
+def getTicket():
+    #make ingredients list
+    print('starting search')
+    ticket = {'fillings': [], 'toppings': [], 'drink': [], 'flip': False}
+    ticket['fillings'] = getFillings()
+    print(ticket['fillings'])
+    ticket['flip'] = isFlip()
+    print(ticket['flip'])
     return ticket
 
 def takeOrder():
@@ -126,7 +133,8 @@ def takeOrder():
     # TODO: get ingredients and put everything into game_state,
     time.sleep(5)
 
-    ingredients = recordIngredients()  
+    ticket = getTicket()  
+    print("order taken", ticket)
     #rice_position = availableRicePot()
     #order = Order(rice_position, ingredients)
     #game_state['orders'].append(order)
